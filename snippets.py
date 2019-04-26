@@ -91,7 +91,7 @@ def check_for_head_movement(self, stream):
         phf_pitch, phf_yaw, phf_roll = chf_pitch, chf_yaw, chf_roll
     return False
 
-"""Snippet 4"""
+"""Snippet 5"""
 
 @staticmethod
 def calculate_pst(stream, fps):
@@ -113,4 +113,33 @@ def calculate_pst(stream, fps):
         prev_frame = frame
     # If the stream did not have any different frames, `None` will be returned.
     return None
+
+"""Snippet 6"""
+
+def generate_pst_latency_score(self, head_stream, camera_stream):
+    """Evaluates the latency score based on the `Pixel Switching Times` (pst).
+
+    This function first check if there is a head movement in the passed in head frame stream
+    and if there is, it calculates the `Pixel Switching Times` (pst) of frames in the camera
+    frame stream.
+
+    Args:
+        head_stream (list): List of head frames.
+        camera_stream(list): List of camera frames(scene frames).
+
+    Returns:
+        int: If the pst is more than the motion-to-photon latency boundary which is specified
+            in the configuration (default 20ms), a score of 1 will be returned. If there is no head
+            movement or if the pst is less than the boundary, 0 will be returned.
+
+    Examples:
+        >>> cssi.latency.generate_pst_latency_score(head_stream, camera_stream)
+    """
+    # Check if there is a head movement
+    movement = self.check_for_head_movement(stream=head_stream)
+
+    # If there is no movement, returns 0.
+    if not movement:
+        return 0
+
 
