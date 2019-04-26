@@ -232,3 +232,27 @@ def detect_emotions(self, frame):
     # Calculating the total sentiment score.
     ts = (n_neg / n_tot) * 100
     return ts
+
+    """ Snippet 10 """"
+    
+def generate_final_score(self, pre, post):
+    """Generates the final questionnaire score.
+    Args:
+        pre (dict): Pre questionnaire results.
+        post (dict): Post questionnaire results.
+    Returns:
+        float: The total questionnaire score.
+    Examples:
+        >>> cssi.questionnaire.generate_final_score(pre, post)
+    """
+    # Calculate the pre and post questionnaire scores.
+    pre_n, pre_o, pre_d, pre_ts = self._calculate_pre_score(pre=pre)
+    post_n, post_o, post_d, post_ts = self._calculate_post_score(post=post)
+
+    # Calculating the total questionnaire score.
+    tq = ((post_ts - pre_ts) / self.QUESTIONNAIRE_MAX_TOTAL_SCORE) * 100
+    return tq
+
+
+
+print('')
