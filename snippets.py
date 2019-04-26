@@ -142,4 +142,34 @@ def generate_pst_latency_score(self, head_stream, camera_stream):
     if not movement:
         return 0
 
+ """Snippet 7"""
+    
+
+ def generate_final_score(self, scores):
+    """Generators the final latency score.
+
+    `sum_ln` is used to persist the sum of the individual latency scores.
+    Then the sum is divided by n`, which is the number of latency tests carried out.
+    The result is then multiplied by 100 to generate `tl` (Total Latency Score).
+
+    Args:
+        scores (list): A list of python dictionaries containing all the individual
+            latency scores. ex: [{"score": 0,"timestamp": "2019-04-24 18:29:25"}]
+
+    Returns:
+        float: The total latency score.
+
+    Examples:
+        >>> cssi.latency.generate_final_score(scores)
+    """
+    n = len(scores)  # Total number of emotions captured
+    sum_ls = 0.0  # Variable to store thr sum of the individual latency scores
+
+    # Calculates the sum of latency scores.
+    for score in scores:
+        sum_ls += score['score']
+
+    # Calculating the total latency score i.e `tl`
+    tl = (sum_ls / n) * 100
+    return tl
 
