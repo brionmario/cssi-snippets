@@ -200,3 +200,35 @@ def detect_emotions(self, frame):
         label = self.POSSIBLE_EMOTIONS[predictions.argmax()]
         logger.debug("Identified emotion is: {0}".format(label))
         return label
+
+    """ Snippet 9 """"
+    
+    def generate_final_score(self, all_emotions, expected_emotions):
+    """Generators the final sentiment score.
+
+    Different applications will cause the user to portray different emotions.
+    ["angry", "disgust", "scared", "sad"] are considered negative emotions by default
+    unless specified in the `expected_emotions` array.
+
+    Args:
+        all_emotions (list): A list of all the captured emotions
+        expected_emotions (list): A list of expected emotions during the session.
+    Returns:
+        float: The total sentiment score.
+
+    Examples:
+        >>> cssi.sentiment.generate_final_score(all_emotions, expected_emotions)
+    """
+    n_tot = len(all_emotions)  # Total number of emotions captured
+    n_neg = 0  # Variable to record the negative emotion count.
+
+    # Checks if the emotion is negative and if it is, and if it is not in
+    # the expected emotions list, `n_neg` will be incremented by one.
+    for emotion in all_emotions:
+        if emotion["sentiment"] in self.NEGATIVE_EMOTIONS:
+            if emotion["sentiment"] not in expected_emotions:
+                n_neg += 1
+
+    # Calculating the total sentiment score.
+    ts = (n_neg / n_tot) * 100
+    return ts
