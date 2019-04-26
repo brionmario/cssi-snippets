@@ -173,3 +173,30 @@ def generate_pst_latency_score(self, head_stream, camera_stream):
     tl = (sum_ls / n) * 100
     return tl
 
+ """Snippet 8"""
+
+def detect_emotions(self, frame):
+    """Detects the sentiment on a face."""
+    frame_resized = resize_image(frame, width=300)
+    gray = cv2.cvtColor(frame_resized, cv2.COLOR_BGR2GRAY)
+    faces = self.face_detector.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=2, minSize=(30, 30),
+                                                flags=cv2.CASCADE_SCALE_IMAGE)
+
+    if len(faces) > 0:
+        logger.debug("Number of Faces: {0}".format(len(faces)))
+        faces = sorted(faces, reverse=True,
+                       key=lambda x: (x[2] - x[0]) * (x[3] - x[1]))[0]
+        (fx, fy, fw, fh) = faces
+
+        # Extract the ROI of the face and resize it to 28x28 pixels
+        # to make it compatible with the detector model.
+        roi = gray[fy:fy + fh, fx:fx + fw]
+        roi = cv2.resize(roi, (64, 64))
+        roi = roi.astype("float") / 255.0
+        roi = img_to_array(roi)
+        roi = np.expand_dims(roi, axis=0)
+
+        predictions = self.emotion_detector.predict(roi)[0]
+        label = self.POSSIBLE_EMOTIONS[predictions.argmax()]
+        logger.debug("Identified emotion is: {0}".format(label))
+        return label
