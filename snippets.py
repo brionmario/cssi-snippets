@@ -327,5 +327,21 @@ def generate_cssi_score(self, tl, ts, tq, plugin_scores=None):
     return cssi
 
 
+"""Snippet 12"""
+
+
+@celery.task
+def record_sentiment(head_frame, session_id):
+    """Celery task which handles sentiment score generation and persistence"""
+    from .wsgi_aux import app
+    with app.app_context():
+        sentiment = cssi.sentiment.detect_emotions(frame=head_frame)
+        session = Session.query.filter_by(id=session_id).first()
+        if session is not None:
+            if sentiment is not None:
+                new_score = {'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'sentiment': sentiment}
+                session.sentiment_scores.append(new_score)
+                db.session.commit()
+                
 
 print('')
