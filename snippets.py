@@ -17,7 +17,7 @@ class CSSI(object):
     """The main access point for the CSSI library"""
 
     def __init__(self, shape_predictor, debug=False, config_file=None):
-        """Initializes all the core modules in the CSSI Library."""
+        """ Initializes all the core modules in the CSSI Library."""
         
         # If no config file name is passed in, defaults to `config.cssi`
         if config_file is None:
@@ -33,8 +33,9 @@ class CSSI(object):
         self.sentiment = Sentiment(config=self.config, debug=self.debug)
         # Initializing the questionnaire module.
         self.questionnaire = SSQ(config=self.config, debug=self.debug)
+        # Initializing the plugins specified in the configuration file
+        self.plugins = Plugins.init_plugins(modules=self.config.plugins, config=self.config, debug=self.debug)
         logger.debug("CSSI library initialized......")
-
        
 
 """Snippet 3"""
