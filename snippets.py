@@ -193,23 +193,21 @@ def generate_pst_latency_score(self, head_stream, camera_stream):
 
     """ Snippet 10 """"
     
-def generate_final_score(self, pre, post):
-    """Generates the final questionnaire score.
-    Args:
-        pre (dict): Pre questionnaire results.
-        post (dict): Post questionnaire results.
-    Returns:
-        float: The total questionnaire score.
-    Examples:
-        >>> cssi.questionnaire.generate_final_score(pre, post)
-    """
-    # Calculate the pre and post questionnaire scores.
-    pre_n, pre_o, pre_d, pre_ts = self._calculate_pre_score(pre=pre)
-    post_n, post_o, post_d, post_ts = self._calculate_post_score(post=post)
+    def generate_final_score(self, pre, post):
+        """Generates the final questionnaire score."""
+                             
+        # Calculate the pre and post questionnaire scores.
+        _, _, _, pre_ts = self._calculate_pre_score(pre=pre)
+        _, _, _, post_ts = self._calculate_post_score(post=post)
 
-    # Calculating the total questionnaire score.
-    tq = ((post_ts - pre_ts) / self.QUESTIONNAIRE_MAX_TOTAL_SCORE) * 100
-    return tq
+        # Calculating the total questionnaire score.
+        tq = ((post_ts - pre_ts) / self.QUESTIONNAIRE_MAX_TOTAL_SCORE) * 100
+
+        # check if score is less than 0, if yes, moderate it to 0
+        if tq < 0:
+            tq = 0
+
+        return tq
 
 
 """Snippet 11"""
