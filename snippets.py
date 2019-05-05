@@ -317,6 +317,7 @@ def record_sentiment(head_frame, session_id):
 @celery.task
 def calculate_latency(session_id, limit):
     """Celery task which handles latency score generation and persistence"""
+                             
     from .wsgi_aux import app
     with app.app_context():
         head_key = "head-frames"
