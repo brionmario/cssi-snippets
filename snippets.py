@@ -40,20 +40,7 @@ class CSSI(object):
 
 
 def generate_rotation_latency_score(self, head_angles, camera_angles):
-    """Evaluates the latency score for a corresponding head and scene rotation pair.
-
-    Args:
-        head_angles (list): Pair of head rotation angles in a list. i.e pitch, yaw and
-            roll of previous and current rotation.
-        camera_angles(list): Pair of scene rotation angles in a list. i.e pitch, yaw and
-            roll of previous and current rotation.
-
-    Returns:
-        int: If there is a discrepancy in the rotations 1 will be returned, else 0.
-
-    Examples:
-        >>> cssi.latency.generate_rotation_latency_score(head_angles, camera_angles)
-    """
+    """Evaluates the latency score for a corresponding head and scene rotation pair."""
     # Calculates the difference of the angle pairs.
     hp_diff, hy_diff, hr_diff = self._calculate_angle_pair_diff(head_angles)
     cp_diff, cy_diff, cr_diff = self._calculate_angle_pair_diff(camera_angles)
