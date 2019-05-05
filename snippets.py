@@ -138,13 +138,11 @@ def generate_pst_latency_score(self, head_stream, camera_stream):
         
         # prepare the frame for processing
         frame = prep_image(frame)
-
         frame = resize_image(frame, width=400)
-
-        (h, w) = frame.shape[:2]
+        (h, w) = frame.shape[:2
+                             
         blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0,
                                      (300, 300), (104.0, 177.0, 123.0))
-
         self.face_detector.setInput(blob)
         detections = self.face_detector.forward()
 
