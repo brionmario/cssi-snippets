@@ -105,24 +105,8 @@ def check_for_head_movement(self, stream):
 """Snippet 6"""
 
 def generate_pst_latency_score(self, head_stream, camera_stream):
-    """Evaluates the latency score based on the `Pixel Switching Times` (pst).
-
-    This function first check if there is a head movement in the passed in head frame stream
-    and if there is, it calculates the `Pixel Switching Times` (pst) of frames in the camera
-    frame stream.
-
-    Args:
-        head_stream (list): List of head frames.
-        camera_stream(list): List of camera frames(scene frames).
-
-    Returns:
-        int: If the pst is more than the motion-to-photon latency boundary which is specified
-            in the configuration (default 20ms), a score of 1 will be returned. If there is no head
-            movement or if the pst is less than the boundary, 0 will be returned.
-
-    Examples:
-        >>> cssi.latency.generate_pst_latency_score(head_stream, camera_stream)
-    """
+    """Evaluates the latency score based on the `Pixel Switching Times` (pst)."""
+    
     # Check if there is a head movement
     movement = self.check_for_head_movement(stream=head_stream)
 
@@ -134,22 +118,8 @@ def generate_pst_latency_score(self, head_stream, camera_stream):
     
 
  def generate_final_score(self, scores):
-    """Generators the final latency score.
-
-    `sum_ln` is used to persist the sum of the individual latency scores.
-    Then the sum is divided by n`, which is the number of latency tests carried out.
-    The result is then multiplied by 100 to generate `tl` (Total Latency Score).
-
-    Args:
-        scores (list): A list of python dictionaries containing all the individual
-            latency scores. ex: [{"score": 0,"timestamp": "2019-04-24 18:29:25"}]
-
-    Returns:
-        float: The total latency score.
-
-    Examples:
-        >>> cssi.latency.generate_final_score(scores)
-    """
+    """Generators the final latency score."""
+    
     n = len(scores)  # Total number of emotions captured
     sum_ls = 0.0  # Variable to store thr sum of the individual latency scores
 
@@ -165,6 +135,7 @@ def generate_pst_latency_score(self, head_stream, camera_stream):
 
 def detect_emotions(self, frame):
     """Detects the sentiment on a face."""
+    
     frame_resized = resize_image(frame, width=300)
     gray = cv2.cvtColor(frame_resized, cv2.COLOR_BGR2GRAY)
     faces = self.face_detector.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=2, minSize=(30, 30),
