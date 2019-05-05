@@ -175,21 +175,8 @@ def generate_pst_latency_score(self, head_stream, camera_stream):
     """ Snippet 9 """"
     
     def generate_final_score(self, all_emotions, expected_emotions):
-    """Generators the final sentiment score.
-
-    Different applications will cause the user to portray different emotions.
-    ["angry", "disgust", "scared", "sad"] are considered negative emotions by default
-    unless specified in the `expected_emotions` array.
-
-    Args:
-        all_emotions (list): A list of all the captured emotions
-        expected_emotions (list): A list of expected emotions during the session.
-    Returns:
-        float: The total sentiment score.
-
-    Examples:
-        >>> cssi.sentiment.generate_final_score(all_emotions, expected_emotions)
-    """
+    """Generators the final sentiment score."""
+                             
     n_tot = len(all_emotions)  # Total number of emotions captured
     n_neg = 0  # Variable to record the negative emotion count.
 
