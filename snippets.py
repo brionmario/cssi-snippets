@@ -133,32 +133,46 @@ def generate_pst_latency_score(self, head_stream, camera_stream):
 
  """Snippet 8"""
 
-def detect_emotions(self, frame):
-    """Detects the sentiment on a face."""
-    
-    frame_resized = resize_image(frame, width=300)
-    gray = cv2.cvtColor(frame_resized, cv2.COLOR_BGR2GRAY)
-    faces = self.face_detector.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=2, minSize=(30, 30),
-                                                flags=cv2.CASCADE_SCALE_IMAGE)
+    def detect_emotions(self, frame):
+        """Detects the sentiment on a face."""
+        
+        # prepare the frame for processing
+        frame = prep_image(frame)
 
-    if len(faces) > 0:
-        logger.debug("Number of Faces: {0}".format(len(faces)))
-        faces = sorted(faces, reverse=True,
-                       key=lambda x: (x[2] - x[0]) * (x[3] - x[1]))[0]
-        (fx, fy, fw, fh) = faces
+        frame = resize_image(frame, width=400)
 
-        # Extract the ROI of the face and resize it to 28x28 pixels
-        # to make it compatible with the detector model.
-        roi = gray[fy:fy + fh, fx:fx + fw]
-        roi = cv2.resize(roi, (64, 64))
-        roi = roi.astype("float") / 255.0
-        roi = img_to_array(roi)
-        roi = np.expand_dims(roi, axis=0)
+        (h, w) = frame.shape[:2]
+        blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0,
+                                     (300, 300), (104.0, 177.0, 123.0))
 
-        predictions = self.emotion_detector.predict(roi)[0]
-        label = self.POSSIBLE_EMOTIONS[predictions.argmax()]
-        logger.debug("Identified emotion is: {0}".format(label))
-        return label
+        self.face_detector.setInput(blob)
+        detections = self.face_detector.forward()
+
+        # loop over the detections
+        for i in range(0, detections.shape[2]):
+            # extract the confidence
+            confidence = detections[0, 0, i, 2]
+
+            # filter out weak detections
+            if confidence < 0.5:
+                continue
+
+            # compute the (x, y)-coordinates of the bounding box
+            box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+            (startX, startY, endX, endY) = box.astype("int")
+
+            # extract the face ROI
+            face = frame[startY:endY, startX:endX]
+            face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
+            face = cv2.resize(face, (64, 64))
+            face = face.astype("float") / 255.0
+            face = img_to_array(face)
+            face = np.expand_dims(face, axis=0)
+
+            predictions = self.emotion_detector.predict(face)[0]
+            label = self.POSSIBLE_EMOTIONS[predictions.argmax()]
+            
+            return label
 
     """ Snippet 9 """"
     
