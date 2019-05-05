@@ -309,6 +309,56 @@ def record_sentiment(head_frame, session_id):
 
     @staticmethod
     def _get_meta_file_path(filename):
-        return os.path.join(os.path.dirname(os.path.abspath(__file__)), "meta", filename)                             
+        return os.path.join(os.path.dirname(os.path.abspath(__file__)), "meta", filename)     
+                             
+"""Snippet 14"""
+                             
+                             
+@celery.task
+def calculate_latency(session_id, limit):
+    """Celery task which handles latency score generation and persistence"""
+    from .wsgi_aux import app
+    with app.app_context():
+        head_key = "head-frames"
+        scene_key = "scene-frames"
+
+        r = redis.StrictRedis(host='localhost', port=6379, db=0)
+        head_frames_raw = get_frames_from_redis(r=r, key=head_key, limit=limit)
+        scene_frames_raw = get_frames_from_redis(r=r, key=scene_key, limit=limit)
+
+        head_stream = []
+        scene_stream = []
+
+        for data in head_frames_raw:
+            head_stream.append(decode_base64(data))
+
+        for data in scene_frames_raw:
+            scene_stream.append(decode_base64(data))
+
+        _, phf_pitch, phf_yaw, phf_roll = cssi.latency.calculate_head_pose(frame=head_stream[0])
+        _, chf_pitch, chf_yaw, chf_roll = cssi.latency.calculate_head_pose(frame=head_stream[1])
+        _, _, ff_angles, sf_angles = cssi.latency.calculate_camera_pose(first_frame=scene_stream[0],
+                                                                        second_frame=scene_stream[1], crop=True,
+                                                                        crop_direction='horizontal')
+
+        head_angles = [[phf_pitch, phf_yaw, phf_roll], [chf_pitch, chf_yaw, chf_roll]]
+        camera_angles = [ff_angles, sf_angles]
+
+        latency_score = cssi.latency.generate_rotation_latency_score(head_angles=head_angles,
+                                                                     camera_angles=camera_angles)
+
+        head_movement = cssi.latency.check_for_head_movement(head_stream)
+        logger.debug("Head movement detected: {0}".format(head_movement))
+
+        pst = cssi.latency.calculate_pst(scene_stream, 10)
+        logger.debug("Pixel switching time: {0}".format(pst))
+
+        session = Session.query.filter_by(id=session_id).first()
+        if session is not None:
+            new_score = {'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'score': latency_score}
+            session.latency_scores.append(new_score)
+            db.session.commit()
+                             
+                             
   
 print('')
