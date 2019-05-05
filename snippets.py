@@ -212,75 +212,50 @@ def generate_pst_latency_score(self, head_stream, camera_stream):
 
 """Snippet 11"""
 
-def generate_cssi_score(self, tl, ts, tq, plugin_scores=None):
-    """Generators the final CSSI score.
+    def generate_cssi_score(self, tl, ts, tq, plugin_scores=None):
+        """Generators the final CSSI score."""
+                             
+        tot_ps = 0.0  # Variable to store the sum of the plugin scores
+        tot_pw = 0  # Variable to keep track total plugin weight
 
-    This is the core function of the CSSI library and it takes in the scores and
-    generates the final CSSI score for the test session.
+        # Checks if any plugins are provided for score calculation.
+        if plugin_scores is not None:
+            for plugin in plugin_scores:
+                plugin_name = plugin["name"]
+                # Checks if the plugin is registered in the configuration file
+                # If not, raises an exception.
+                if plugin_name not in self.config.plugins:
+                    raise CSSIException("The plugin {0} appears to be invalid.".format(plugin_name))
+                else:
+                    plugin_weight = float(self.config.plugin_options[plugin_name]["weight"]) / 100
+                    plugin_score = plugin["score"]
 
-    Args:
-        tl (float): Total latency score
-        ts (float): Total sentiment score
-        tq (float): Total questionnaire score
-        plugin_scores (list): A list of dictionaries containing plugin details.
-            ex: [{"name": "heartrate.plugin", "score": 40.00}].
-    Returns:
-        float: The CSSI score.
-    Raises:
-        CSSIException: If the calculations couldn't be completed successfully
-            this exception will be thrown.
-    Examples:
-        >>> cssi.generate_cssi_score(tl, ts, tq, plugin_scores)
-    """
-    tot_ps = 0.0  # Variable to store the sum of the plugin scores
-    tot_pw = 0  # Variable to keep track total plugin weight
+                    # Checks if the passed in plugin score is less than 100.
+                    # If not an exception will be thrown.
+                    if plugin_score > 100:
+                        raise CSSIException("Invalid score provided for the plugin: {0}.".format(plugin_name))
 
-    # Checks if any plugins are provided for score calculation.
-    if plugin_scores is not None:
-        for plugin in plugin_scores:
-            plugin_name = plugin["name"]
-            # Checks if the plugin is registered in the configuration file
-            # If not, raises an exception.
-            if plugin_name not in self.config.plugins:
-                raise CSSIException(
-                    "The plugin {0} appears to be invalid.".format(plugin_name))
-            else:
-                plugin_weight = float(
-                    self.config.plugin_options[plugin_name]["weight"]) / 100
-                plugin_score = plugin["score"]
+                    # Ads the current plugin score to the total plugin score.
+                    tot_ps += plugin_score * plugin_weight
+                    # Ads the current plugin weight to the total plugin weight percentage.
+                    tot_pw += plugin_weight
 
-                # Checks if the passed in plugin score is less than 100.
-                # If not an exception will be thrown.
-                if plugin_score > 100:
-                    raise CSSIException(
-                        "Invalid score provided for the plugin: {0}.".format(plugin_name))
+        lw = float(self.config.latency_weight) / 100  # latency weight percentage
+        sw = float(self.config.sentiment_weight) / 100  # sentiment weight percentage
+        qw = float(self.config.questionnaire_weight) / 100  # questionnaire weight percentage
 
-                # Ads the current plugin score to the total plugin score.
-                tot_ps += plugin_score * plugin_weight
-                # Ads the current plugin weight to the total plugin weight percentage.
-                tot_pw += plugin_weight
+        # Checks if the total weight is less than 100 percent.
+        if (lw + sw + qw + tot_pw) > 1:
+            raise CSSIException("Invalid weight configuration. Please reconfigure and try again")
 
-    lw = float(self.config.latency_weight) / \
-        100  # latency weight percentage
-    sw = float(self.config.sentiment_weight) / \
-        100  # sentiment weight percentage
-    qw = float(self.config.questionnaire_weight) / \
-        100  # questionnaire weight percentage
+        # Calculating the CSSI score
+        cssi = (tl * lw) + (ts * sw) + (tq * qw) + tot_ps
 
-    # Checks if the total weight is less than 100 percent.
-    if (lw + sw + qw + tot_pw) > 1:
-        raise CSSIException(
-            "Invalid weight configuration. Please reconfigure and try again")
+        # Double checks if the generated CSSI score is less than 100.
+        if cssi > 100:
+            raise CSSIException("Invalid CSSI score was generated. Please try again")
 
-    # Calculating the CSSI score
-    cssi = (tl * lw) + (ts * sw) + (tq * qw) + tot_ps
-
-    # Double checks if the generated CSSI score is less than 100.
-    if cssi > 100:
-        raise CSSIException(
-            "Invalid CSSI score was generated. Please try again")
-
-    return cssi
+        return cssi
 
 
 """Snippet 12"""
