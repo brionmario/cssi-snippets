@@ -18,6 +18,7 @@ class CSSI(object):
 
     def __init__(self, shape_predictor, debug=False, config_file=None):
         """Initializes all the core modules in the CSSI Library."""
+        
         # If no config file name is passed in, defaults to `config.cssi`
         if config_file is None:
             self.config_file = "config.cssi"
@@ -41,6 +42,7 @@ class CSSI(object):
 
 def generate_rotation_latency_score(self, head_angles, camera_angles):
     """Evaluates the latency score for a corresponding head and scene rotation pair."""
+    
     # Calculates the difference of the angle pairs.
     hp_diff, hy_diff, hr_diff = self._calculate_angle_pair_diff(head_angles)
     cp_diff, cy_diff, cr_diff = self._calculate_angle_pair_diff(camera_angles)
