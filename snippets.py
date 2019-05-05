@@ -300,6 +300,42 @@ def record_sentiment(head_frame, session_id):
                 new_score = {'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'sentiment': sentiment}
                 session.sentiment_scores.append(new_score)
                 db.session.commit()
-                
+                             
+"""Snippet 13"""
 
+    def _calculate_ssq_total_score(self, questionnaire, filename):
+        """Calculates the SSQ score for a particular questionnaire"""
+        _n = 0.0
+        _o = 0.0
+        _d = 0.0
+        try:
+            with open(self._get_meta_file_path(filename)) as meta_file:
+                meta = json.load(meta_file)
+                # Iterate through the symptoms and generate the
+                # populate the `N`, `O` & `D` symptom scores.
+                for s in meta["symptoms"]:
+                    if s["weight"]["N"] == 1:
+                        _n += int(questionnaire[s["symptom"]])
+                    if s["weight"]["O"] == 1:
+                        _o += int(questionnaire[s["symptom"]])
+                    if s["weight"]["D"] == 1:
+                        _d += int(questionnaire[s["symptom"]])
+
+                # Calculate the `N`, `O` & `D` weighted scores.
+                # and finally compute the total score.
+                n = _n * meta["conversion_multipliers"]["N"]
+                o = _o * meta["conversion_multipliers"]["O"]
+                d = _d * meta["conversion_multipliers"]["D"]
+                ts = (_n + _o + _d) * meta["conversion_multipliers"]["TS"]
+
+                return n, o, d, ts
+        except FileNotFoundError as error:
+            raise CSSIException(
+                "Questionnaire meta file couldn't not be found at %s" % (self._get_meta_file_path(filename))
+            ) from error
+
+    @staticmethod
+    def _get_meta_file_path(filename):
+        return os.path.join(os.path.dirname(os.path.abspath(__file__)), "meta", filename)                             
+  
 print('')
