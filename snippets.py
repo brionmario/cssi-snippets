@@ -63,6 +63,7 @@ def generate_rotation_latency_score(self, head_angles, camera_angles):
 
 def check_for_head_movement(self, stream):
     """Checks whether if there is a head movement in a stream of head frames."""
+    
     phf_pitch, phf_yaw, phf_roll = 0.0, 0.0, 0.0
     for idx, frame in enumerate(stream):
         _, chf_pitch, chf_yaw, chf_roll = self.calculate_head_pose(
@@ -79,26 +80,27 @@ def check_for_head_movement(self, stream):
 
 """Snippet 5"""
 
-@staticmethod
-def calculate_pst(stream, fps):
-    """Calculates the `Pixel Switching Times` (pst) of a camera frame stream."""
-    prev_frame = None
-    processed_count = 0
-    equal_count = 0
-    for idx, frame in enumerate(stream):
-        processed_count += 1
-        if idx != 0:
-            diff = cv2.subtract(prev_frame, frame)
-            B, G, R = cv2.split(diff)
-            # If all the pixels (Red, Green &  Blue) are equal then the two images are similar.
-            # If not then the images are different and the pst is calculated.
-            if cv2.countNonZero(B) == 0 and cv2.countNonZero(G) == 0 and cv2.countNonZero(R) == 0:
-                equal_count += 1
-            else:
-                return (processed_count / fps) * 1000
-        prev_frame = frame
-    # If the stream did not have any different frames, `None` will be returned.
-    return None
+    @staticmethod
+    def calculate_pst(stream, fps):
+        """Calculates the `Pixel Switching Times` (pst) of a camera frame stream."""
+        
+        prev_frame = None
+        processed_count = 0
+        equal_count = 0
+        for idx, frame in enumerate(stream):
+            processed_count += 1
+            if idx != 0:
+                diff = cv2.subtract(prev_frame, frame)
+                B, G, R = cv2.split(diff)
+                # If all the pixels (Red, Green &  Blue) are equal then the two images are similar.
+                # If not then the images are different and the pst is calculated.
+                if cv2.countNonZero(B) == 0 and cv2.countNonZero(G) == 0 and cv2.countNonZero(R) == 0:
+                    equal_count += 1
+                else:
+                    return (processed_count / fps) * 1000
+            prev_frame = frame
+        # If the stream did not have any different frames, `None` will be returned.
+        return None
 
 """Snippet 6"""
 
